@@ -91,7 +91,7 @@ jobs:
         working-directory: example
 
       - name: Deploy to Walrus
-        uses: MystenLabs/deploy-walrus-site-action@v1
+        uses: MystenLabs/walrus-sites-github-actions/deploy@v1
         with:
           SUI_NETWORK: ${{ inputs.SUI_NETWORK || 'mainnet' }}
           SUI_ADDRESS: ${{ vars.SUI_ADDRESS }}
