@@ -97,6 +97,13 @@ inputs:
           When using this, the workflow must have `contents: write` and `pull-requests: write`
           permissions.
         required: false
+    SITE_BUILDER_VERSION:
+        description: |
+          The major version of site-builder to use. Choose between 'v1' or 'v2'.
+          - v1: Automatically fetches the latest v1.x release from GitHub
+          - v2: Automatically fetches the latest v2.x release from GitHub
+        required: false
+        default: "v2"
 
 runs:
     using: "composite"
@@ -262,6 +269,7 @@ runs:
               SUI_KEYSTORE: "${{ steps.sui_account.outputs.sui_keystore }}"
               WALRUS_CONFIG: "${{ steps.walrus_config_step.outputs.walrus_config }}"
               SUI_NETWORK: "${{ inputs.SUI_NETWORK }}"
+              SITE_BUILDER_VERSION: "${{ inputs.SITE_BUILDER_VERSION }}"
         # This step prepares the sites-config.yaml file, which defines the sites to be deployed.
         # It uses the `SITES_CONFIG` input if provided; otherwise, it downloads the default
         # configuration for the mainnet from the walrus-sites repository.

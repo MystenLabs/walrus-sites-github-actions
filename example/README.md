@@ -99,6 +99,7 @@ jobs:
           DIST: example/dist
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           EPOCHS: ${{ inputs.EPOCHS || '5' }}
+          SITE_BUILDER_VERSION: 'v2'  # Optional: Use 'v1' or 'v2' (default: 'v2')
 ```
 
 ## Project Structure
