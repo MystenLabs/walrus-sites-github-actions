@@ -1,0 +1,46 @@
+name: Deploy Vite React App to Walrus
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      SUI_NETWORK:
+        description: 'Sui network to deploy to'
+        required: false
+        default: 'mainnet'
+      EPOCHS:
+        description: 'Epochs to keep the site alive'
+        required: false
+        default: '5'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'latest'
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: .
+
+      - name: Build application
+        run: npm run build
+        working-directory: .
+
+      - name: Deploy to Walrus
+        uses: MystenLabs/walrus-sites-github-actions/deploy@v1
+        with:
+          SUI_NETWORK: ${{ inputs.SUI_NETWORK || 'mainnet' }}
+          SUI_BECH32_PRIVATE_KEY: ${{ secrets.SUI_BECH32_PRIVATE_KEY }}
+          DIST: ./dist
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EPOCHS: ${{ inputs.EPOCHS || '5' }}
