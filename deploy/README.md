@@ -131,15 +131,16 @@ jobs:
 
 ### Optional Inputs
 
-| Input | Description                                                                 | Default |
-|-------|-----------------------------------------------------------------------------|---------|
-| `SUI_NETWORK` | Sui network to use                                                          | `mainnet` |
-| `WALRUS_CONFIG` | Custom Walrus configuration file content                                    | Downloads from Walrus repo |
+| Input | Description                                                                 | Default                          |
+|-------|-----------------------------------------------------------------------------|----------------------------------|
+| `SUI_NETWORK` | Sui network to use                                                          | `mainnet`                        |
+| `WALRUS_CONFIG` | Custom Walrus configuration file content                                    | Downloads from Walrus repo       |
 | `SITES_CONFIG` | Custom sites-config.yaml content                                            | Downloads from walrus-sites repo |
-| `WS_RESOURCES` | Path to ws-resources.json file                                              | `$DIST/ws-resources.json` |
-| `EPOCHS` | Number of epochs to keep the site                                           | `5` |
-| `CHECK_EXTEND` | Whether to check and extend storage period. Only valid for site-builder v1. | `false` |
-| `GITHUB_TOKEN` | Token for creating PRs when resources change                                | (none) |
+| `WS_RESOURCES` | Path to ws-resources.json file                                              | `$DIST/ws-resources.json`        |
+| `EPOCHS` | Number of epochs to keep the site                                           | `5`                              |
+| `CHECK_EXTEND` | Whether to check and extend storage period. Only valid for site-builder v1. | `false`                          |
+| `GITHUB_TOKEN` | Token for creating PRs when resources change                                | (none)                           |
+| `SITE_BUILDER_VERSION` | Version of site-builder to use. Choose between 'v1' or 'v2' | `v2`                             |
 
 ## Security Features
 
