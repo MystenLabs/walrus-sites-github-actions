@@ -174,6 +174,8 @@ runs:
 
             # Set outputs for subsequent steps
             echo "needs_derivation=$needs_derivation" >> "$GITHUB_OUTPUT"
+            # Mask key_string before outputting to prevent exposure in logs
+            echo "::add-mask::$key_string"
             echo "key_string=$key_string" >> "$GITHUB_OUTPUT"
             echo "🎯 Authentication method validated successfully"
 
@@ -209,20 +211,54 @@ runs:
             INPUT_SUI_ADDRESS: ${{ inputs.SUI_ADDRESS }}
             INPUT_SUI_KEYSTORE: ${{ inputs.SUI_KEYSTORE }}
           run: |
+            # Just in case, disable shell tracing if it was enabled elsewhere
+            set +x
+            
             if [[ "$NEEDS_DERIVATION" == "true" ]]; then
+              # Mask the secret before doing anything else
+              echo "::add-mask::$KEY_STRING"
+
               echo "🔑 Deriving Sui Ed25519 account from provided credentials..."
 
-              # Import the key using sui keytool with Ed25519 scheme
-              import_result=$(sui keytool import "$KEY_STRING" ed25519 --json)
+              temp_file=$(mktemp)
 
-              # Extract address from the JSON result
-              sui_address=$(echo "$import_result" | jq -r '.suiAddress')
+              # Redirect BOTH stdout and stderr to the temp file (outer redirection only)
+              sui keytool import "$KEY_STRING" ed25519 --json >"$temp_file" 2>&1
+            
+              import_result=$(<"$temp_file")
+              rm -f "$temp_file"
 
-              # Get the keystore content (this will be in ~/.sui/sui_config/sui.keystore)
-              keystore_content=$(cat ~/.sui/sui_config/sui.keystore)
+              # Now that we have the JSON locally, we can scan it for base64 and mask those values
+              # We must be careful NOT to echo the sensitive values while masking them
+              while IFS= read -r line; do
+                # Only mask actual base64 values (not field names like "suiAddress")
+                # Skip common JSON field names
+                if [[ "$line" =~ \"([A-Za-z0-9+/=]{20,})\" ]]; then
+                  matched="${BASH_REMATCH[1]}"
+                  # Only mask if it looks like actual key material (has base64 characters)
+                  if [[ "$matched" =~ [+/] ]] || [[ "$matched" =~ =$ ]]; then
+                    echo "::add-mask::${matched}"
+                  fi
+                fi
+              done <<< "$import_result"
 
-              # Mask the derived keystore to prevent exposure in logs
-              echo "::add-mask::$keystore_content"
+              # Extract address
+              sui_address=$(printf '%s\n' "$import_result" | jq -r '.suiAddress')
+
+              # Read keystore file WITHOUT printing it
+              keystore_file="$HOME/.sui/sui_config/sui.keystore"
+              keystore_content=$(<"$keystore_file")
+
+              # Use jq to properly parse the keystore JSON array and extract each string
+              # This avoids regex issues with multiline matching
+              if command -v jq >/dev/null 2>&1; then
+                # Parse keystore as JSON array and mask each element
+                jq -r '.[]' <<< "$keystore_content" 2>/dev/null | while read -r key_value; do
+                  if [[ -n "$key_value" ]]; then
+                    echo "::add-mask::${key_value}"
+                  fi
+                done
+              fi
 
               echo "✅ Sui account derived successfully"
               echo "📍 Address: $sui_address"
@@ -230,14 +266,14 @@ runs:
               echo "📋 Using provided SUI_ADDRESS and SUI_KEYSTORE"
               sui_address="$INPUT_SUI_ADDRESS"
               keystore_content="$INPUT_SUI_KEYSTORE"
+            
+              echo "::add-mask::$keystore_content"
             fi
 
-            # Output the final values for subsequent steps
+            # Export outputs without ever echoing raw keystore to logs
             echo "sui_address=$sui_address" >> "$GITHUB_OUTPUT"
 
-            # Remove newlines from keystore content for safe single-line output
-            keystore_oneline=$(echo "$keystore_content" | tr -d '\n\r')
-            # Mask the single-line keystore as well
+            keystore_oneline=$(printf '%s' "$keystore_content" | tr -d '\n\r')
             echo "::add-mask::$keystore_oneline"
             echo "sui_keystore=$keystore_oneline" >> "$GITHUB_OUTPUT"
 
@@ -263,7 +299,7 @@ runs:
         # This step sets up the Sui and Walrus environment using a dedicated GitHub Action. It
         # installs the necessary tools, like the `walrus` and `site-builder` binaries.
         - name: Setup Walrus
-          uses: "MystenLabs/walrus/.github/actions/set-up-walrus/@ebb65a1b3f9e0e3cf663d3a041deb7928dc544fe" # main
+          uses: "MystenLabs/walrus/.github/actions/set-up-walrus/@682587efb05f915476d88b458eac8db1d0a24b33" # main
           with:
               SUI_ADDRESS: "${{ steps.sui_account.outputs.sui_address }}"
               SUI_KEYSTORE: "${{ steps.sui_account.outputs.sui_keystore }}"

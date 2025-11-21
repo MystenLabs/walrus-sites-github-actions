@@ -41,6 +41,11 @@ jobs:
         with:
           SUI_NETWORK: ${{ inputs.SUI_NETWORK || 'mainnet' }}
           SUI_BECH32_PRIVATE_KEY: ${{ secrets.SUI_BECH32_PRIVATE_KEY }}
+          ## Alternatively, you can use SUI_SECRET_PHRASE instead of SUI_BECH32_PRIVATE_KEY:
+          ## SUI_SECRET_PHRASE: ${{ secrets.SUI_SECRET_PHRASE }}
+          ## Or provide both SUI_ADDRESS and SUI_KEYSTORE:
+          ## SUI_ADDRESS: ${{ vars.SUI_ADDRESS }}
+          ## SUI_KEYSTORE: ${{ secrets.SUI_KEYSTORE }}
           DIST: ./dist
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           EPOCHS: ${{ inputs.EPOCHS || '5' }}
