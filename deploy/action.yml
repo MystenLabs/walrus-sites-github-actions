@@ -109,6 +109,12 @@ inputs:
           The gas budget for the Sui transaction (in MIST).
           If not provided, site-builder will use its default gas budget.
         required: false
+    OBJECT_ID:
+        description: |
+          The object ID of an existing site to update.
+          If provided, this overrides the object ID in the ws-resources.json file.
+          Use this for updating a previously published site.
+        required: false
 
 runs:
     using: "composite"
@@ -335,6 +341,7 @@ runs:
             EPOCHS: ${{ inputs.EPOCHS }}
             SUI_NETWORK: ${{ inputs.SUI_NETWORK }}
             GAS_BUDGET: ${{ inputs.GAS_BUDGET }}
+            OBJECT_ID: ${{ inputs.OBJECT_ID }}
           run: |
             ARGS=(
               --context "$SUI_NETWORK"
@@ -352,6 +359,9 @@ runs:
             fi
             if [[ "$CHECK_EXTEND" == "true" ]]; then
               ARGS+=(--check-extend)
+            fi
+            if [[ -n "$OBJECT_ID" ]]; then
+              ARGS+=(--object-id "$OBJECT_ID")
             fi
             site-builder "${ARGS[@]}"
           shell: bash
