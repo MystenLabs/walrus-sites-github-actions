@@ -104,6 +104,11 @@ inputs:
           - v2: Automatically fetches the latest v2.x release from GitHub
         required: false
         default: "v2"
+    GAS_BUDGET:
+        description: |
+          The gas budget for the Sui transaction (in MIST).
+          If not provided, site-builder will use its default gas budget.
+        required: false
 
 runs:
     using: "composite"
@@ -329,11 +334,15 @@ runs:
             CHECK_EXTEND: ${{ inputs.CHECK_EXTEND }}
             EPOCHS: ${{ inputs.EPOCHS }}
             SUI_NETWORK: ${{ inputs.SUI_NETWORK }}
+            GAS_BUDGET: ${{ inputs.GAS_BUDGET }}
           run: |
             ARGS=(
               --context "$SUI_NETWORK"
               --config sites-config.yaml
             )
+            if [[ -n "$GAS_BUDGET" ]]; then
+              ARGS+=(--gas-budget "$GAS_BUDGET")
+            fi
             ARGS+=(
               deploy "$DIST_PATH"
               --epochs "$EPOCHS"
