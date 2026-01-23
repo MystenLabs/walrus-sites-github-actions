@@ -310,7 +310,7 @@ runs:
         # This step sets up the Sui and Walrus environment using a dedicated GitHub Action. It
         # installs the necessary tools, like the `walrus` and `site-builder` binaries.
         - name: Setup Walrus
-          uses: "MystenLabs/walrus/.github/actions/set-up-walrus/@682587efb05f915476d88b458eac8db1d0a24b33" # main
+          uses: "MystenLabs/walrus/.github/actions/set-up-walrus/@ci-site-builder-installation-gh-releases-only-mainnet" # main
           with:
               SUI_ADDRESS: "${{ steps.sui_account.outputs.sui_address }}"
               SUI_KEYSTORE: "${{ steps.sui_account.outputs.sui_keystore }}"
