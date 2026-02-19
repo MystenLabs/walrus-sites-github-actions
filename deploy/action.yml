@@ -231,6 +231,22 @@ runs:
 
               echo "🔑 Deriving Sui Ed25519 account from provided credentials..."
 
+              # Ensure sui config directory exists. Since Sui v1.66.1 (PR #23146),
+              # `sui keytool` requires a valid client.yaml even for standalone key
+              # operations. Initialize a minimal config if it doesn't exist.
+              if [[ ! -f "$HOME/.sui/sui_config/client.yaml" ]]; then
+                mkdir -p "$HOME/.sui/sui_config"
+                echo '[]' > "$HOME/.sui/sui_config/sui.keystore"
+                printf '%s\n' \
+                  'keystore:' \
+                  "  File: $HOME/.sui/sui_config/sui.keystore" \
+                  'envs:' \
+                  '  - alias: default' \
+                  '    rpc: "https://fullnode.mainnet.sui.io:443"' \
+                  'active_env: default' \
+                  > "$HOME/.sui/sui_config/client.yaml"
+              fi
+
               temp_file=$(mktemp)
 
               # Redirect BOTH stdout and stderr to the temp file (outer redirection only)
