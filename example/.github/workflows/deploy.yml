@@ -37,7 +37,7 @@ jobs:
         working-directory: .
 
       - name: Deploy to Walrus
-        uses: MystenLabs/walrus-sites-github-actions/deploy@v2
+        uses: MystenLabs/walrus-sites-github-actions/deploy@v3
         with:
           SUI_NETWORK: ${{ inputs.SUI_NETWORK || 'mainnet' }}
           SUI_BECH32_PRIVATE_KEY: ${{ secrets.SUI_BECH32_PRIVATE_KEY }}
